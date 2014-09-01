@@ -55,7 +55,7 @@ esac
 
 AC_DEFINE_UNQUOTED(SHARED_LIB_SUFFIX, "${MODULE_EXT}", [Suffix for shared objects])
 
-requirement_esskyuehl="eina ecore"
+requirement_esskyuehl="eina >= 1.10.0 ecore >= 1.10.0 eo >= 1.10.0 emodel >= 1.10.0 eio >= 1.10.0"
 AC_SUBST(requirement_esskyuehl)
 
 PKG_CHECK_MODULES([EFL], [$requirement_esskyuehl])
