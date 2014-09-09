@@ -44,7 +44,8 @@ mod_LTLIBRARIES =
 MOD_CFLAGS = \
 -I$(top_builddir) \
 @EFL_CFLAGS@ \
--I$(top_srcdir)/src/lib
+-I$(top_srcdir)/src/lib \
+-DEFL_BETA_API_SUPPORT
 
 MOD_LIBS = \
 $(top_builddir)/src/lib/libesskyuehl.la \

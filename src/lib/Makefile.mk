@@ -19,6 +19,7 @@ src/lib/esql_alloc.c \
 src/lib/esql_connect.c \
 src/lib/esql_convert.c \
 src/lib/esql_events.c \
+src/lib/esql_model.c \
 src/lib/esql_module.c \
 src/lib/esql_module.h \
 src/lib/esql_pool.c \
