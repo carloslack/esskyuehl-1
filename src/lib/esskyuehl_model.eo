@@ -1,0 +1,4 @@
+class Esql.Model (Eo.Base, Emodel)
+{
+    legacy_prefix: null;
+}
