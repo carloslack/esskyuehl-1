@@ -1,10 +1,7 @@
 pkginclude_HEADERS = src/lib/Esskyuehl.h
 pkgincludedir = @includedir@/esskyuehl-@VMAJ@
 
-###
-### SQL_MODEL
-
-
+### eolian directives - begin
 SUFFIXES = .eo .eo.c .eo.h .eo.legacy.h
 
 %.eo.c: %.eo ${_EOLIAN_GEN_DEP}
@@ -30,15 +27,10 @@ esql_modeleolianfiles_DATA = \
 
 EXTRA_DIST += $(esql_modeleolianfiles_DATA)
 
-
 installed_esql_modelmainheadersdir = $(includedir)/esskyuehl-@VMAJ@
-
 dist_installed_esql_modelmainheaders_DATA = src/lib/Esql_Model.h
 nodist_installed_esql_modelmainheaders_DATA = $(ESQL_EO_GENERATED)
-
-
-
-###
+### eolian directives - end
 
 
 lib_LTLIBRARIES = src/lib/libesskyuehl.la
