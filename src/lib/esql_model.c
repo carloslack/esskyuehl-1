@@ -7,7 +7,7 @@
 #include <Eina.h>
 #include <Ecore.h>
 
-#include "esskyuehl_model_private.h"
+#include "esql_model_private.h"
 
 
-#include "esskyuehl_model.eo.c"
+#include "esql_model.eo.c"

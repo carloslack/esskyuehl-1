@@ -16,21 +16,21 @@ pkgincludedir = @includedir@/esskyuehl-@VMAJ@
 CLEANFILES += $(BUILT_SOURCES)
 
 ESQL_EO_GENERATED = \
-           src/lib/esskyuehl_model.eo.c \
-           src/lib/esskyuehl_model.eo.h
+           src/lib/esql_model.eo.c \
+           src/lib/esql_model.eo.h
 
 BUILT_SOURCES = $(ESQL_EO_GENERATED)
 
 esskyuehleolianfilesdir = $(datadir)/eolian/include/esskyuehl-@VMAJ@
 esskyuehleolianfiles_DATA = \
-              src/lib/esskyuehl_model.eo
+              src/lib/esql_model.eo
 
 EXTRA_DIST += $(esskyuehleolianfiles_DATA)
 
-installed_esskyuehl_modelmainheadersdir = $(includedir)/esskyuehl-@VMAJ@
+installed_esql_modelmainheadersdir = $(includedir)/esskyuehl-@VMAJ@
 
-dist_installed_esskyuehl_modelmainheaders_DATA = src/lib/Esskyuehl_Model.h
-nodist_installed_esskyuehl_modelmainheaders_DATA = $(ESQL_EO_GENERATED)
+dist_installed_esql_modelmainheaders_DATA = src/lib/Esskyuehl.h
+nodist_installed_esql_modelmainheaders_DATA = $(ESQL_EO_GENERATED)
 
 
 
@@ -55,7 +55,7 @@ src/lib/esql_alloc.c \
 src/lib/esql_connect.c \
 src/lib/esql_convert.c \
 src/lib/esql_events.c \
-src/lib/esskyuehl_model.c \
+src/lib/esql_model.c \
 src/lib/esql_module.c \
 src/lib/esql_module.h \
 src/lib/esql_pool.c \
