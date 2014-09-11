@@ -6,6 +6,7 @@
 #include <Emodel.h>
 #include <Eina.h>
 #include <Ecore.h>
+#include "Esql_Model.h"
 
 #include "esql_model_private.h"
 

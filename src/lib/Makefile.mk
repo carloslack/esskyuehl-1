@@ -4,6 +4,9 @@ pkgincludedir = @includedir@/esskyuehl-@VMAJ@
 ###
 ### SQL_MODEL
 
+
+SUFFIXES = .eo .eo.c .eo.h .eo.legacy.h
+
 %.eo.c: %.eo ${_EOLIAN_GEN_DEP}
 	eolian_gen --eo --legacy `pkg-config --variable=eolian_flags eo emodel` --gc -o $@ $<
 
@@ -21,15 +24,16 @@ ESQL_EO_GENERATED = \
 
 BUILT_SOURCES = $(ESQL_EO_GENERATED)
 
-esskyuehleolianfilesdir = $(datadir)/eolian/include/esskyuehl-@VMAJ@
-esskyuehleolianfiles_DATA = \
+esql_modeleolianfilesdir = $(datadir)/eolian/include/esskyuehl-@VMAJ@
+esql_modeleolianfiles_DATA = \
               src/lib/esql_model.eo
 
-EXTRA_DIST += $(esskyuehleolianfiles_DATA)
+EXTRA_DIST += $(esql_modeleolianfiles_DATA)
+
 
 installed_esql_modelmainheadersdir = $(includedir)/esskyuehl-@VMAJ@
 
-dist_installed_esql_modelmainheaders_DATA = src/lib/Esskyuehl.h
+dist_installed_esql_modelmainheaders_DATA = src/lib/Esql_Model.h
 nodist_installed_esql_modelmainheaders_DATA = $(ESQL_EO_GENERATED)
 
 
