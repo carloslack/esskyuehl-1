@@ -14,12 +14,12 @@
 #define MY_CLASS_NAME "Esql_Model"
 
 static void
-_load_set(Esql_Model_Data *priv, Emodel_Load load)
+_load_set(Esql_Model_Data *pd, Emodel_Load load)
 {
-   if ((priv->load.status & (EMODEL_LOAD_STATUS_LOADED | EMODEL_LOAD_STATUS_LOADING)) &&
+   if ((pd->load.status & (EMODEL_LOAD_STATUS_LOADED | EMODEL_LOAD_STATUS_LOADING)) &&
                         (load.status & (EMODEL_LOAD_STATUS_LOADED | EMODEL_LOAD_STATUS_LOADING)))
      {
-        load.status = priv->load.status | load.status;
+        load.status = pd->load.status | load.status;
         switch (load.status)
           {
            case EMODEL_LOAD_STATUS_LOADED_PROPERTIES:
@@ -38,10 +38,10 @@ _load_set(Esql_Model_Data *priv, Emodel_Load load)
           }
      }
 
-   if (priv->load.status != load.status)
+   if (pd->load.status != load.status)
      {
-         priv->load.status = load.status;
-         eo_do(priv->obj, eo_event_callback_call(EMODEL_EVENT_LOAD_STATUS, &load));
+         pd->load.status = load.status;
+         eo_do(pd->obj, eo_event_callback_call(EMODEL_EVENT_LOAD_STATUS, &load));
      }
 }
 
