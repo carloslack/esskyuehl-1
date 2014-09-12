@@ -1,8 +1,20 @@
 class Esql.Model (Eo.Base, Emodel)
 {
     legacy_prefix: null;
+    constructors {
+       constructor {
+          /*@ Custom Esql_Model constructor.
+            @def esql_model_constructor
+            @since 1.12
+            @in path */
+          params {
+             @in const(char)* addr;
+             @in const(char)* user;
+             @in const(char)* password;
+          }
+       }
+    }
    implements {
-      Eo.Base.constructor;
       Eo.Base.destructor;
       Emodel.properties_list.get;
       Emodel.properties_load;
