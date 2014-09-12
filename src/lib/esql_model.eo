@@ -1,4 +1,20 @@
 class Esql.Model (Eo.Base, Emodel)
 {
     legacy_prefix: null;
+   implements {
+      Eo.Base.constructor;
+      Eo.Base.destructor;
+      Emodel.properties_list.get;
+      Emodel.properties_load;
+      Emodel.property.set;
+      Emodel.property.get;
+      Emodel.load;
+      Emodel.load_status.get;
+      Emodel.unload;
+      Emodel.child_add;
+      Emodel.child_del;
+      Emodel.children_slice.get;
+      Emodel.children_count.get;
+      Emodel.children_load;
+   }
 }
