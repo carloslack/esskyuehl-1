@@ -84,6 +84,7 @@ void _esql_model_constructor(Eo *obj, Esql_Model_Data *pd,
                                 const char *addr, const char *user, const char *password)
 {
    Emodel_Load load;
+   Esql_Model_Data *priv = pd;
    Esql_Type type = ESQL_TYPE_SQLITE;
 
    EINA_SAFETY_ON_NULL_RETURN(addr);
@@ -92,24 +93,25 @@ void _esql_model_constructor(Eo *obj, Esql_Model_Data *pd,
 
    eo_do_super(obj, MY_CLASS, eo_constructor());
 
-   pd->obj = obj;
-   pd->e = esql_new(type);
-   EINA_SAFETY_ON_NULL_RETURN(pd->e);
+   priv->obj = obj;
+   priv->e = esql_new(type);
+   EINA_SAFETY_ON_NULL_RETURN(priv->e);
 
-   pd->backend_type = type;
-   pd->conn.addr = addr;
-   pd->conn.user = user;
-   pd->conn.password = password;
-   pd->load.status = EMODEL_LOAD_STATUS_UNLOADED;
+   priv->backend_type = type;
+   priv->conn.addr = addr;
+   priv->conn.user = user;
+   priv->conn.password = password;
+   priv->load.status = EMODEL_LOAD_STATUS_UNLOADED;
 
    load.status = EMODEL_LOAD_STATUS_UNLOADED;
-   _load_set(pd, load);
+   _load_set(priv, load);
 }
 
 void _esql_model_eo_base_destructor(Eo *obj, Esql_Model_Data *pd EINA_UNUSED)
 {
-   EINA_SAFETY_ON_NULL_RETURN(pd->e);
-   esql_free(pd->e);
+   Esql_Model_Data *priv = pd;
+   EINA_SAFETY_ON_NULL_RETURN(priv->e);
+   esql_free(priv->e);
    eo_do_super(obj, MY_CLASS, eo_destructor());
 }
 
@@ -199,13 +201,14 @@ Emodel_Load_Status _esql_model_emodel_load_status_get(Eo *obj EINA_UNUSED, Esql_
 void _esql_model_emodel_unload(Eo *obj EINA_UNUSED, Esql_Model_Data *pd)
 {
    Emodel_Load load;
-   Eina_Bool ret = esql_isconnected(pd->e);
+   Esql_Model_Data *priv = pd;
+   Eina_Bool ret = esql_isconnected(priv->e);
 
    EINA_SAFETY_ON_FALSE_RETURN(ret);
 
-   esql_disconnect(pd->e);
+   esql_disconnect(priv->e);
    load.status = EMODEL_LOAD_STATUS_UNLOADED;
-   _load_set(pd, load);
+   _load_set(priv, load);
 }
 
 Eo * _esql_model_emodel_child_add(Eo *obj EINA_UNUSED, Esql_Model_Data *pd EINA_UNUSED)
@@ -227,9 +230,11 @@ Emodel_Load_Status _esql_model_emodel_children_slice_get(Eo *obj EINA_UNUSED, Es
 Emodel_Load_Status _esql_model_emodel_children_count_get(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd EINA_UNUSED, unsigned *children_count EINA_UNUSED)
 {
+   Esql_Model_Data *priv = pd;
+
    /**< eina_list_count returns 'unsigned int' */
-   *children_count = eina_list_count(pd->children_list);
-   return pd->load.status;
+   *children_count = eina_list_count(priv->children_list);
+   return priv->load.status;
 }
 
 void _esql_model_emodel_children_load(Eo *obj EINA_UNUSED, Esql_Model_Data *pd EINA_UNUSED)
