@@ -24,6 +24,10 @@ struct _Esql_Model_Data
 {
    Eo *obj;
    Esql *e; /**< Opaque base Esskyuehl object for connecting to servers */
+   Eina_List *properties_list;
+   Eina_List *children_list;
+   Eina_Value *properties;
+   int load_pending;
    Esql_Type backend_type; /**< MySQL, SQLite, Postgress... */
    Esql_Query_Id query_id; /**< current query id */
    Esql_Model_Connection_Data conn;

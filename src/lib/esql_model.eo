@@ -29,7 +29,7 @@ class Esql.Model (Eo.Base, Emodel)
                  return Emodel_Load_Status;
             }
              values {
-               char* database_name;
+               const(char)* database_name;
              }
         }
     }
