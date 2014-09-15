@@ -191,6 +191,7 @@ void _esql_model_emodel_properties_load(Eo *obj EINA_UNUSED, Esql_Model_Data *pd
 Emodel_Load_Status _esql_model_emodel_property_set(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd EINA_UNUSED, const char * property EINA_UNUSED, Eina_Value value EINA_UNUSED)
 {
+   Esql_Model_Data *priv = pd;
 /*
    Esql_Query_Id id = esql_query(Esql *e, void *data, const char *query);
    Eina_Bool ret = esql_query_callback_set(id, _esql_query_cb);
