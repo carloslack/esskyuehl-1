@@ -15,6 +15,28 @@
 #define MY_CLASS_NAME "Esql_Model"
 
 static Eina_Value_Struct_Desc *ESQL_MODEL_PROPERTIES_DESC = NULL;
+static void _load_set(Esql_Model_Data *pd, Emodel_Load load);
+
+/**
+ * SQL query callback
+ */
+static void EINA_UNUSED
+_esql_query_cb(Esql_Res *res EINA_UNUSED, void *data EINA_UNUSED)
+{
+}
+
+/**
+ * Connect callback
+ */
+static void
+_esql_connect_cb(Esql *e EINA_UNUSED, void *data)
+{
+   Emodel_Load load;
+   Esql_Model_Data *priv = (Esql_Model_Data*)data;
+
+   load.status = EMODEL_LOAD_STATUS_LOADED;
+   _load_set(priv, load);
+}
 
 static void
 _load_set(Esql_Model_Data *pd, Emodel_Load load)
@@ -103,6 +125,8 @@ void _esql_model_constructor(Eo *obj, Esql_Model_Data *pd,
    priv->conn.password = password;
    priv->load.status = EMODEL_LOAD_STATUS_UNLOADED;
 
+   //EAPI Eina_Bool esql_query_callback_set(Esql_Query_Id id, Esql_Query_Cb callback);
+
    load.status = EMODEL_LOAD_STATUS_UNLOADED;
    _load_set(priv, load);
 }
@@ -181,14 +205,20 @@ void _esql_model_emodel_load(Eo *obj EINA_UNUSED, Esql_Model_Data *pd)
 
    if(esql_isconnected(priv->e) == EINA_FALSE)
      {
+        /**
+         * First we set load status to loading
+         */
+        load.status = EMODEL_LOAD_STATUS_LOADING;
+        _load_set(priv, load);
+
+        esql_connect_callback_set(priv->e, _esql_connect_cb, (void*)priv);
         ret = esql_connect(priv->e, priv->conn.addr, priv->conn.user, priv->conn.password);
         EINA_SAFETY_ON_FALSE_RETURN(ret);
+        return;
      }
 
-   //_esql_model_emodel_properties_load(obj, priv); //XXX: implement
-   //_esql_model_emodel_children_load(obj, priv); //XXX: implement
-
-
+   //_esql_model_emodel_properties_load(obj, priv); //XXX
+   //_esql_model_emodel_children_load(obj, priv); //XXX
    load.status = EMODEL_LOAD_STATUS_LOADED;
    _load_set(priv, load);
 }
