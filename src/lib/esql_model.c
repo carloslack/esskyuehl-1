@@ -6,12 +6,15 @@
 #include <Emodel.h>
 #include <Eina.h>
 #include <Ecore.h>
+#include <sqlite3.h> /**< For SQLite datatypes */
 #include "Esql_Model.h"
 
 #include "esql_model_private.h"
 
 #define MY_CLASS ESQL_MODEL_CLASS
 #define MY_CLASS_NAME "Esql_Model"
+
+static Eina_Value_Struct_Desc *ESQL_MODEL_PROPERTIES_DESC = NULL;
 
 static void
 _load_set(Esql_Model_Data *pd, Emodel_Load load)
@@ -43,6 +46,36 @@ _load_set(Esql_Model_Data *pd, Emodel_Load load)
          pd->load.status = load.status;
          eo_do(pd->obj, eo_event_callback_call(EMODEL_EVENT_LOAD_STATUS, &load));
      }
+}
+
+static void EINA_UNUSED
+_struct_properties_init(void)
+{
+   typedef struct _This_Esql_Model_Properties
+     {
+        const char *name;
+        unsigned int type;
+        Eina_Value value;
+     } This_Esql_Model_Properties;
+
+   static Eina_Value_Struct_Member prop_members[] = {
+     EINA_VALUE_STRUCT_MEMBER(NULL, This_Esql_Model_Properties, name),
+     EINA_VALUE_STRUCT_MEMBER(NULL, This_Esql_Model_Properties, value),
+     EINA_VALUE_STRUCT_MEMBER(NULL, This_Esql_Model_Properties, type)
+   };
+   //XXX: Check data types
+   prop_members[ESQL_MODEL_PROP_NAME].type = EINA_VALUE_TYPE_STRING;
+   prop_members[ESQL_MODEL_PROP_VALUE].type = EINA_VALUE_TYPE_STRING; /**< any type from and to string */
+   prop_members[ESQL_MODEL_PROP_TYPE].type = EINA_VALUE_TYPE_INT;
+
+   static Eina_Value_Struct_Desc prop_desc = {
+     EINA_VALUE_STRUCT_DESC_VERSION,
+     NULL, // no special operations
+     prop_members,
+     EINA_C_ARRAY_LENGTH(prop_members),
+     sizeof(This_Esql_Model_Properties)
+   };
+   ESQL_MODEL_PROPERTIES_DESC = &prop_desc;
 }
 
 /**
@@ -80,6 +113,19 @@ void _esql_model_eo_base_destructor(Eo *obj, Esql_Model_Data *pd EINA_UNUSED)
    esql_free(pd->e);
    eo_do_super(obj, MY_CLASS, eo_destructor());
 }
+
+Emodel_Load_Status  _esql_model_database_name_set(Eo *obj EINA_UNUSED,
+                                Esql_Model_Data *pd EINA_UNUSED, char *database_name EINA_UNUSED)
+{
+   return pd->load.status;
+}
+
+Emodel_Load_Status  _esql_model_database_name_get(Eo *obj EINA_UNUSED,
+                                Esql_Model_Data *pd EINA_UNUSED, char **database_name EINA_UNUSED)
+{
+   return pd->load.status;
+}
+
 
 Emodel_Load_Status _esql_model_emodel_properties_list_get(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd EINA_UNUSED, const Eina_List **properties_list EINA_UNUSED)

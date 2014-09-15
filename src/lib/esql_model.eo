@@ -14,6 +14,25 @@ class Esql.Model (Eo.Base, Emodel)
           }
        }
     }
+    properties {
+        database_name {
+            set {
+                /*@
+                 Set database name.
+                 */
+                 return Emodel_Load_Status;
+            }
+            get {
+                /*@
+                 Get database name.
+                 */
+                 return Emodel_Load_Status;
+            }
+             values {
+               char* database_name;
+             }
+        }
+    }
    implements {
       Eo.Base.destructor;
       Emodel.properties_list.get;

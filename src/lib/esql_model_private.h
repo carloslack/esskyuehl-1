@@ -7,6 +7,12 @@ typedef struct _Esql_Model_Data Esql_Model_Data;
 
 typedef struct _Esql_Model_Connection_Data Esql_Model_Connection_Data;
 
+enum {
+   ESQL_MODEL_PROP_NAME = 0,
+   ESQL_MODEL_PROP_VALUE,
+   ESQL_MODEL_PROP_TYPE
+};
+
 struct _Esql_Model_Connection_Data
 {
    const char *addr;
