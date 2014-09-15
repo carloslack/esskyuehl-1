@@ -185,12 +185,23 @@ void _esql_model_emodel_properties_load(Eo *obj EINA_UNUSED, Esql_Model_Data *pd
 {
 }
 
+/**
+ * Execute queries and set callback
+ */
 Emodel_Load_Status _esql_model_emodel_property_set(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd EINA_UNUSED, const char * property EINA_UNUSED, Eina_Value value EINA_UNUSED)
 {
-   return EMODEL_LOAD_STATUS_ERROR;
+/*
+   Esql_Query_Id id = esql_query(Esql *e, void *data, const char *query);
+   Eina_Bool ret = esql_query_callback_set(id, _esql_query_cb);
+   EINA_SAFETY_ON_FALSE_RETURN_VAL(ret, EMODEL_LOAD_STATUS_ERROR);
+*/
+   return priv->load.status;
 }
 
+/**
+ * Get query values
+ */
 Emodel_Load_Status _esql_model_emodel_property_get(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd EINA_UNUSED, const char * property EINA_UNUSED, Eina_Value *value EINA_UNUSED)
 {
