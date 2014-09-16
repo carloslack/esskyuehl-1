@@ -33,6 +33,18 @@ class Esql.Model (Eo.Base, Emodel)
              }
         }
     }
+    methods {
+        table_add {
+                /*@
+                 Set database's table name.
+                 */
+                 return Emodel_Load_Status;
+             params {
+               const(char)* table_name;
+               Esql_Model_Row_Data row;
+             }
+        }
+    }
    implements {
       Eo.Base.destructor;
       Emodel.properties_list.get;

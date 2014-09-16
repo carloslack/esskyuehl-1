@@ -25,6 +25,56 @@ _esql_query_cb(Esql_Res *res EINA_UNUSED, void *data EINA_UNUSED)
 {
 }
 
+static void EINA_UNUSED
+_esql_query_alter_table_cb(Esql_Res *res, void *data EINA_UNUSED)
+{
+   fprintf(stdout, "Executed query %d: %s\n",esql_res_query_id_get(res), esql_res_query_get(res));
+   fprintf(stdout, "Error message: %s\n", esql_res_error_get(res));
+   //XXX: Check this, disptach property change notification
+}
+
+/**
+ * Basically each child will be made of a
+ * table column which will then be:
+ *
+ *    database                   [parent]
+ *       table (name + type)     [child]
+ *          value                [child's value]
+ *
+ */
+static void EINA_UNUSED
+_esql_query_create_table_cb(Esql_Res *res EINA_UNUSED, void *data)
+{
+   //XXX: This code is still not tested/evaluated so no reason for panic (yet).
+   char *query;
+   Eina_Bool ret;
+   size_t total_len;
+
+   Esql_Model_Data *priv = (Esql_Model_Data *)data;
+   size_t table_name_len = strlen(priv->table_name);
+
+   total_len = strlen("ALTER TABLE ") + table_name_len +
+       strlen(" ADD COLUMN ") + strlen(priv->row.row_name) + 1 + strlen(priv->row.type);
+
+   query = calloc(1, total_len + 1 /* '\0' terminated string */);
+   EINA_SAFETY_ON_NULL_RETURN(query);
+
+   snprintf(query, total_len, "ALTER TABLE %s ADD COLUMN %s %s",
+            priv->table_name, priv->row.row_name, priv->row.type);
+
+   Esql_Query_Id id = esql_query(priv->e, data, (const char *)query);
+   ret = (id == 0) ? EINA_FALSE : EINA_TRUE;
+   EINA_SAFETY_ON_FALSE_GOTO(ret, cleanup);
+
+   fprintf(stdout, "Trying to execute query id %d: %s\n", id, query);
+
+   ret = esql_query_callback_set(id, _esql_query_alter_table_cb);
+   EINA_SAFETY_ON_FALSE_GOTO(ret, cleanup);
+
+cleanup:
+   free(query);
+}
+
 /**
  * Connect callback
  */
@@ -123,8 +173,6 @@ void _esql_model_constructor(Eo *obj, Esql_Model_Data *pd,
    priv->conn.addr = addr;
    priv->conn.user = user;
    priv->conn.password = password;
-   priv->load.status = EMODEL_LOAD_STATUS_UNLOADED;
-
    //EAPI Eina_Bool esql_query_callback_set(Esql_Query_Id id, Esql_Query_Cb callback);
 
    load.status = EMODEL_LOAD_STATUS_UNLOADED;
@@ -139,6 +187,11 @@ void _esql_model_eo_base_destructor(Eo *obj, Esql_Model_Data *pd EINA_UNUSED)
    eo_do_super(obj, MY_CLASS, eo_destructor());
 }
 
+/**
+ * This function should always be called before esql_connect()
+ * to ensure portability.
+ * @see esql_connect.c
+ */
 Emodel_Load_Status  _esql_model_database_name_set(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd EINA_UNUSED, const char *database_name EINA_UNUSED)
 {
@@ -147,6 +200,7 @@ Emodel_Load_Status  _esql_model_database_name_set(Eo *obj EINA_UNUSED,
 
    ret = esql_database_set(priv->e, database_name);
    EINA_SAFETY_ON_FALSE_RETURN_VAL(ret, EMODEL_LOAD_STATUS_ERROR);
+   priv->database_name = database_name;
    return pd->load.status;
 }
 
@@ -159,8 +213,40 @@ Emodel_Load_Status  _esql_model_database_name_get(Eo *obj EINA_UNUSED,
    return pd->load.status;
 }
 
+Emodel_Load_Status
+_esql_model_table_add(Eo *obj EINA_UNUSED, Esql_Model_Data *pd, const char *table_name, Esql_Model_Row_Data row)
+{
+   Esql_Model_Data *priv = pd;
+   char *query = NULL;
+   size_t tlen;
 
-Emodel_Load_Status _esql_model_emodel_properties_list_get(Eo *obj EINA_UNUSED,
+   EINA_SAFETY_ON_NULL_RETURN_VAL(table_name, EMODEL_LOAD_STATUS_ERROR);
+   EINA_SAFETY_ON_NULL_RETURN_VAL(esql_database_get(priv->e),EMODEL_LOAD_STATUS_ERROR);
+   EINA_SAFETY_ON_FALSE_RETURN_VAL(esql_isconnected(priv->e),EMODEL_LOAD_STATUS_ERROR);
+
+   tlen = strlen(table_name);
+
+   query = calloc(1, strlen("CREATE TABLE ") + tlen + 1);
+   EINA_SAFETY_ON_NULL_RETURN_VAL(query, EMODEL_LOAD_STATUS_ERROR);
+
+   snprintf(query, tlen, "CREATE TABLE %s", table_name);
+
+   priv->table_name = table_name;
+   priv->row.row_name = row.row_name;
+   priv->row.type = row.type;
+
+   Esql_Query_Id id = esql_query(priv->e, priv, (const char *)query);
+   Eina_Bool ret = esql_query_callback_set(id, _esql_query_create_table_cb);
+   if(ret != EINA_TRUE)
+     ERR("Error: esql_query_callback_set()\n");
+
+   free(query);
+
+   return pd->load.status;
+}
+
+Emodel_Load_Status
+_esql_model_emodel_properties_list_get(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd, const Eina_List **properties_list)
 {
    Esql_Model_Data *priv = pd;
@@ -191,13 +277,23 @@ void _esql_model_emodel_properties_load(Eo *obj EINA_UNUSED, Esql_Model_Data *pd
 Emodel_Load_Status _esql_model_emodel_property_set(Eo *obj EINA_UNUSED,
                                 Esql_Model_Data *pd EINA_UNUSED, const char * property EINA_UNUSED, Eina_Value value EINA_UNUSED)
 {
+#if 0
+   //XXX: check properties schema
    Esql_Model_Data *priv = pd;
-/*
-   Esql_Query_Id id = esql_query(Esql *e, void *data, const char *query);
+   Eina_Value v = value;
+   char *query = eina_value_to_string(&v);
+
+   Esql_Query_Id id = esql_query(priv->e, priv, (const char *)query);
    Eina_Bool ret = esql_query_callback_set(id, _esql_query_cb);
-   EINA_SAFETY_ON_FALSE_RETURN_VAL(ret, EMODEL_LOAD_STATUS_ERROR);
-*/
+
+   EINA_SAFETY_ON_FALSE_GOTO(ret, error);
+
+   free(query);
    return priv->load.status;
+error:
+   free(query);
+#endif
+   return EMODEL_LOAD_STATUS_ERROR;
 }
 
 /**
@@ -215,6 +311,8 @@ void _esql_model_emodel_load(Eo *obj EINA_UNUSED, Esql_Model_Data *pd)
    Eina_Bool ret;
    Esql_Model_Data *priv = pd;
 
+   EINA_SAFETY_ON_NULL_RETURN(esql_database_get(priv->e));
+
    if(esql_isconnected(priv->e) == EINA_FALSE)
      {
         /**
@@ -223,14 +321,13 @@ void _esql_model_emodel_load(Eo *obj EINA_UNUSED, Esql_Model_Data *pd)
         load.status = EMODEL_LOAD_STATUS_LOADING;
         _load_set(priv, load);
 
+        /* Set connect callback */
         esql_connect_callback_set(priv->e, _esql_connect_cb, (void*)priv);
         ret = esql_connect(priv->e, priv->conn.addr, priv->conn.user, priv->conn.password);
         EINA_SAFETY_ON_FALSE_RETURN(ret);
         return;
      }
 
-   //_esql_model_emodel_properties_load(obj, priv); //XXX
-   //_esql_model_emodel_children_load(obj, priv); //XXX
    load.status = EMODEL_LOAD_STATUS_LOADED;
    _load_set(priv, load);
 }
@@ -249,6 +346,7 @@ void _esql_model_emodel_unload(Eo *obj EINA_UNUSED, Esql_Model_Data *pd)
    EINA_SAFETY_ON_FALSE_RETURN(ret);
 
    esql_disconnect(priv->e);
+
    load.status = EMODEL_LOAD_STATUS_UNLOADED;
    _load_set(priv, load);
 }
@@ -260,7 +358,10 @@ Eo * _esql_model_emodel_child_add(Eo *obj EINA_UNUSED, Esql_Model_Data *pd EINA_
 
 Emodel_Load_Status _esql_model_emodel_child_del(Eo *obj EINA_UNUSED, Esql_Model_Data *pd EINA_UNUSED, Eo *child EINA_UNUSED)
 {
-   return EMODEL_LOAD_STATUS_ERROR;
+   Esql_Model_Data *priv = pd;
+
+   eo_ref(child);
+   return priv->load.status;
 }
 
 Emodel_Load_Status _esql_model_emodel_children_slice_get(Eo *obj EINA_UNUSED, Esql_Model_Data *pd EINA_UNUSED,
